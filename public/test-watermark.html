@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .test-watermark {
+            position: relative;
+            width: 400px;
+            height: 300px;
+            border: 2px solid red;
+        }
+        .test-watermark img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        .test-watermark::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('/images/watermark.png');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 60% auto;
+            opacity: 0.6;
+            pointer-events: none;
+            z-index: 2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Watermark Test</h1>
+    <div class="test-watermark">
+        <img src="/images/idfront.jpg" alt="Test">
+    </div>
+    <p>If you see a watermark overlay on the image above, the watermark is working correctly.</p>
+</body>
+</html>
+

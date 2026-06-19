@@ -1,0 +1,11 @@
+export const SITE_NAME = 'JAYTIMMAID';
+export const SITE_NAME_LOWER = 'jaytimmaid';
+export const COMPANY_NAME = 'JAYTIMMAID Inc.';
+export const EMAIL = 'jaytimmaid.orders@gmail.com';
+export const TELEGRAM_USERNAME = 'jaytimma1';
+export const TELEGRAM_HANDLE = '@jaytimma1';
+export const TELEGRAM_URL = 'https://t.me/jaytimma1';
+export const WHATSAPP_NUMBER = '18324537253';
+export const WHATSAPP_DISPLAY = '+1 (832) 453-7253';
+export const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}`;
+export const CART_STORAGE_KEY = 'jaytimmaid_cart';

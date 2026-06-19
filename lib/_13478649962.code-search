@@ -1,0 +1,9 @@
+# Query: +13478649962
+# ContextLines: 1
+
+1 result - 1 file
+
+app\order\page.tsx:
+  673                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-green focus:border-transparent"
+  674:                   placeholder="Enter your WhatsApp number (e.g. +13344468194)"
+  675                  />

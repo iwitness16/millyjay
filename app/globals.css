@@ -1,0 +1,183 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  --font-display: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  overflow-x: hidden;
+  width: 100%;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  overflow-x: hidden;
+  width: 100%;
+  position: relative;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Prevent horizontal scrolling on all containers */
+.container,
+.max-w-7xl,
+.max-w-6xl,
+.max-w-5xl,
+.max-w-4xl {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Ensure images don't cause overflow */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+h1 {
+  font-size: 1.75rem;
+  line-height: 1.2;
+}
+
+h2 {
+  font-size: 1.5rem;
+  line-height: 1.3;
+}
+
+h3 {
+  font-size: 1.25rem;
+  line-height: 1.4;
+}
+
+h4 {
+  font-size: 1.125rem;
+  line-height: 1.4;
+}
+
+h5 {
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+h6 {
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.font-display {
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+/* Custom Yellow-Green Color */
+.text-yellow-green {
+  color: #efff00;
+}
+
+.bg-yellow-green {
+  background-color: #efff00;
+}
+
+.border-yellow-green {
+  border-color: #efff00;
+}
+
+.hover\:bg-yellow-green:hover {
+  background-color: #efff00;
+}
+
+.hover\:text-yellow-green:hover {
+  color: #ffea00;
+}
+
+/* Additional utility classes for yellow-green */
+.text-yellow-green-hover:hover {
+  color: #ffea00;
+}
+
+.bg-yellow-green-hover:hover {
+  background-color: #ffea00;
+}
+
+/* Watermark overlay for images */
+.watermarked-image {
+  position: relative !important;
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.watermarked-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  position: relative;
+  z-index: 0;
+}
+
+.watermarked-image::after {
+  content: '' !important;
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: 70% !important;
+  height: 70% !important;
+  background-image: url('/images/watermark.png') !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-size: contain !important;
+  opacity: 0.7 !important;
+  pointer-events: none !important;
+  z-index: 999 !important;
+}
+
+/* Product image hover effect */
+.hover-image-container {
+  position: relative;
+}
+
+.hover-image-container:hover .default-image {
+  opacity: 0 !important;
+  z-index: 1 !important;
+}
+
+.hover-image-container .hover-image {
+  z-index: 2 !important;
+}
+
+.hover-image-container:hover .hover-image {
+  opacity: 1 !important;
+  z-index: 2 !important;
+}
