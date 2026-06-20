@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { ShoppingCart, ChevronUp, Search } from 'lucide-react';
 import Link from 'next/link';
@@ -85,7 +85,7 @@ const allProducts = allProductsUnsorted.sort((a, b) => a.name.localeCompare(b.na
 
 const PRODUCT_CATEGORIES = ['ALL', 'USA ID', 'CANADA ID', 'UK ID', 'SSN'] as const;
 
-export default function ProductListPage() {
+function ProductListPageContent() {
   const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
@@ -443,6 +443,21 @@ export default function ProductListPage() {
         </button>
       </div>
     </div>
+  );
+}
+
+export default function ProductListPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-green mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    }>
+      <ProductListPageContent />
+    </Suspense>
   );
 }
 
