@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { ShoppingCart, ChevronUp, Search } from 'lucide-react';
 import Link from 'next/link';
 import { getCartItemCount } from '@/lib/cart';
@@ -82,7 +83,10 @@ const allProductsUnsorted: Product[] = [
 // Sort all products alphabetically by name
 const allProducts = allProductsUnsorted.sort((a, b) => a.name.localeCompare(b.name));
 
+const PRODUCT_CATEGORIES = ['ALL', 'USA ID', 'CANADA ID', 'UK ID', 'SSN'] as const;
+
 export default function ProductListPage() {
+  const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [hoveredProduct, setHoveredProduct] = useState<string | null>(null);
@@ -97,6 +101,14 @@ export default function ProductListPage() {
     window.addEventListener('cartUpdated', updateCartCount);
     return () => window.removeEventListener('cartUpdated', updateCartCount);
   }, []);
+
+  // Apply category from URL query (e.g. /product-list?category=USA%20ID)
+  useEffect(() => {
+    const category = searchParams.get('category');
+    if (category && PRODUCT_CATEGORIES.includes(category as typeof PRODUCT_CATEGORIES[number])) {
+      setSelectedCategory(category);
+    }
+  }, [searchParams]);
 
   // Preload UV back image
   useEffect(() => {

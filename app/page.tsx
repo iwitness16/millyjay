@@ -198,10 +198,10 @@ export default function LandingPage() {
           <Link href="/product-list" className="block text-center text-yellow-green mb-8 sm:mb-12 cursor-pointer hover:underline">View more &gt;</Link>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
             {[
-              { name: 'New York', image: '/images/idfront.jpg' },
-              { name: 'Texas', image: '/images/texas.jpg' },
-              { name: 'London', image: '/images/uk.jpg' },
-              { name: 'SSN', image: '/images/ssn.png' }
+              { name: 'USA', image: '/images/ordertemp.png', category: 'USA ID', priceLabel: '$120' },
+              { name: 'UK', image: '/images/uk.jpg', category: 'UK ID', priceLabel: '£100' },
+              { name: 'CANADA', image: '/images/ontario.jpg', category: 'CANADA ID', priceLabel: '$120' },
+              { name: 'SSN', image: '/images/ssn.png', category: 'SSN', priceLabel: '$120' }
             ].map((product, idx) => (
               <div key={idx} className="rounded-lg overflow-hidden hover:opacity-80 transition">
                 <div className="h-40 sm:h-48 flex items-center justify-center relative overflow-hidden">
@@ -222,8 +222,8 @@ export default function LandingPage() {
                 </div>
                 <div className="p-4 sm:p-6">
                   <h3 className="text-sm sm:text-base font-medium mb-2 sm:mb-3 text-center">{product.name}</h3>
-                  <Link href={`/order?product=${encodeURIComponent(product.name === 'UK' ? 'London' : product.name)}`} className="w-full bg-yellow-green text-black py-2 sm:py-2.5 rounded-full font-medium hover:bg-yellow-green transition text-xs sm:text-sm block text-center">
-                    Order - {product.name === 'London' ? '£100' : '$120'}
+                  <Link href={`/product-list?category=${encodeURIComponent(product.category)}`} className="w-full bg-yellow-green text-black py-2 sm:py-2.5 rounded-full font-medium hover:bg-yellow-green transition text-xs sm:text-sm block text-center">
+                    Order - {product.priceLabel}
                   </Link>
                 </div>
               </div>

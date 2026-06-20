@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { isAuthenticated, logout, getAdminUsername } from '@/lib/adminAuth';
-import { fetchAllOrders, downloadBase64Image, AdminOrderData } from '@/lib/adminFirestore';
+import { fetchAllOrders, downloadBase64Image, deleteOrder, AdminOrderData } from '@/lib/adminFirestore';
 import { Timestamp } from 'firebase/firestore';
 import { 
   LogOut, 
@@ -20,7 +20,8 @@ import {
   Search,
   Filter,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  CheckCircle
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -33,6 +34,8 @@ export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<AdminOrderData | null>(null);
   const [expandedOrders, setExpandedOrders] = useState<Set<string>>(new Set());
+  const [confirmOrder, setConfirmOrder] = useState<AdminOrderData | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     // Check authentication
@@ -91,6 +94,30 @@ export default function AdminDashboard() {
     setExpandedOrders(newExpanded);
   };
 
+  const handleMarkAsDone = async () => {
+    if (!confirmOrder) return;
+
+    setIsDeleting(true);
+    setError('');
+    try {
+      await deleteOrder(confirmOrder.id);
+      setOrders((prev) => prev.filter((o) => o.id !== confirmOrder.id));
+      setExpandedOrders((prev) => {
+        const next = new Set(prev);
+        next.delete(confirmOrder.id);
+        return next;
+      });
+      if (selectedOrder?.id === confirmOrder.id) {
+        setSelectedOrder(null);
+      }
+      setConfirmOrder(null);
+    } catch (err: any) {
+      setError(err.message || 'Failed to clear order');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const formatDate = (date: Date | Timestamp | null): string => {
     if (!date) return 'N/A';
     let d: Date;
@@ -122,30 +149,37 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-black border-b border-white/20 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <Link href="/" className="flex items-center space-x-3">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-0">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:h-16">
+            <div className="flex items-center justify-between gap-3">
+              <Link href="/" className="flex items-center space-x-2 sm:space-x-3 min-w-0">
                 <img 
                   src="/images/logo.jpg" 
                   alt="JAYTIMMAID Logo" 
-                  className="h-10 w-10 object-contain rounded-lg"
+                  className="h-9 w-9 sm:h-10 sm:w-10 object-contain rounded-lg flex-shrink-0"
                 />
-                <div className="flex flex-col">
-                  <div className="text-yellow-green text-lg font-display font-semibold tracking-tight">
+                <div className="flex flex-col min-w-0">
+                  <div className="text-yellow-green text-base sm:text-lg font-display font-semibold tracking-tight">
                     JAYTIMMAID
                   </div>
                   <div className="text-xs text-gray-400 font-sans">Admin Dashboard</div>
                 </div>
               </Link>
+              <button
+                onClick={handleLogout}
+                className="sm:hidden flex items-center justify-center p-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg transition flex-shrink-0"
+                aria-label="Logout"
+              >
+                <LogOut className="w-5 h-5" />
+              </button>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center justify-between sm:justify-end gap-3 border-t border-white/10 pt-3 sm:border-0 sm:pt-0">
               <span className="text-gray-300 text-sm">
                 Welcome, <span className="text-yellow-green font-semibold">{getAdminUsername()}</span>
               </span>
               <button
                 onClick={handleLogout}
-                className="flex items-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition"
+                className="hidden sm:flex items-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition flex-shrink-0"
               >
                 <LogOut className="w-4 h-4" />
                 <span>Logout</span>
@@ -158,16 +192,7 @@ export default function AdminDashboard() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Section */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-lg p-6 border-l-4 border-blue-500">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-500 text-sm font-medium">Total Orders</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">{orders.length}</p>
-              </div>
-              <Package className="w-12 h-12 text-blue-500" />
-            </div>
-          </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
           <div className="bg-white rounded-lg shadow-lg p-6 border-l-4 border-green-500">
             <div className="flex items-center justify-between">
               <div>
@@ -287,7 +312,17 @@ export default function AdminDashboard() {
                           </div>
                         </div>
                       </div>
-                      <div className="ml-4">
+                      <div className="ml-4 flex items-center space-x-3">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setConfirmOrder(order);
+                          }}
+                          className="flex items-center space-x-2 px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-lg transition whitespace-nowrap"
+                        >
+                          <CheckCircle className="w-4 h-4" />
+                          <span>Mark as done</span>
+                        </button>
                         {isExpanded ? (
                           <ChevronUp className="w-6 h-6 text-gray-400" />
                         ) : (
@@ -477,6 +512,51 @@ export default function AdminDashboard() {
           </div>
         )}
       </main>
+
+      {/* Mark as Done Confirmation Modal */}
+      {confirmOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Mark order as processed?</h3>
+            <p className="text-gray-600 text-sm mb-4">
+              This will mark the order for{' '}
+              <span className="font-medium">
+                {confirmOrder.firstName} {confirmOrder.lastName}
+              </span>{' '}
+              ({confirmOrder.product}) as processed and remove it from the dashboard.
+            </p>
+            <p className="text-gray-500 text-sm mb-6">
+              This action cannot be undone. The order will be permanently cleared from Firestore.
+            </p>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => setConfirmOrder(null)}
+                disabled={isDeleting}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleMarkAsDone}
+                disabled={isDeleting}
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition disabled:opacity-50 flex items-center space-x-2"
+              >
+                {isDeleting ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <span>Clearing...</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="w-4 h-4" />
+                    <span>Confirm</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

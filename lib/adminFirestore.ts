@@ -1,5 +1,5 @@
 import { db } from './firebase';
-import { collection, getDocs, query, orderBy, Timestamp } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, Timestamp, doc, deleteDoc } from 'firebase/firestore';
 import { OrderData } from './firestore';
 
 export interface AdminOrderData extends OrderData {
@@ -27,6 +27,18 @@ export const fetchAllOrders = async (): Promise<AdminOrderData[]> => {
   } catch (error: any) {
     console.error('Error fetching orders:', error);
     throw new Error('Failed to fetch orders. Please check your Firestore configuration.');
+  }
+};
+
+export const deleteOrder = async (orderId: string): Promise<void> => {
+  try {
+    await deleteDoc(doc(db, 'orders', orderId));
+  } catch (error: any) {
+    console.error('Error deleting order:', error);
+    if (error.code === 'permission-denied') {
+      throw new Error('Permission denied. Please check your Firestore security rules allow deleting orders.');
+    }
+    throw new Error('Failed to clear order. Please try again.');
   }
 };
 
