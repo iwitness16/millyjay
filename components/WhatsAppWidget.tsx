@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { WHATSAPP_NUMBER } from '@/lib/site';
+import { WHATSAPP_NUMBER, TELEGRAM_URL } from '@/lib/site';
 
 export default function WhatsAppWidget() {
   const [isOpen, setIsOpen] = useState(false);
@@ -17,7 +17,7 @@ export default function WhatsAppWidget() {
   };
 
   return (
-    <div className="fixed z-40 right-4 bottom-24 sm:bottom-28">
+    <div className="fixed z-40 right-4 bottom-24 sm:bottom-28 flex flex-col items-end gap-2 sm:gap-3">
       {isOpen && (
         <div className="mb-3 w-80 max-w-[90vw] bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-200">
           <div className="flex items-center justify-between bg-[#25D366] px-4 py-3">
@@ -79,14 +79,30 @@ export default function WhatsAppWidget() {
         </div>
       )}
 
+      <a
+        href={TELEGRAM_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#229ED9] flex items-center justify-center shadow-lg hover:bg-[#1d8bc4] transition"
+        aria-label="Chat on Telegram"
+      >
+        <svg
+          className="w-5 h-5 sm:w-6 sm:h-6 text-white"
+          fill="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295-.002 0-.003 0-.005 0l.213-3.054 5.56-5.022c.24-.213-.054-.334-.373-.121L7.116 13.815l-2.91-.907c-.632-.196-.642-.632.135-.936l11.37-4.364c.526-.194.988.12.817.936z" />
+        </svg>
+      </a>
+
       <button
         type="button"
         onClick={() => setIsOpen((open) => !open)}
-        className="w-14 h-14 rounded-full bg-[#25D366] flex items-center justify-center shadow-xl hover:bg-[#20BA5A] transition"
+        className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#25D366] flex items-center justify-center shadow-xl hover:bg-[#20BA5A] transition"
         aria-label="Open WhatsApp chat"
       >
         <svg
-          className="w-7 h-7 text-white"
+          className="w-6 h-6 sm:w-7 sm:h-7 text-white"
           fill="currentColor"
           viewBox="0 0 24 24"
         >
