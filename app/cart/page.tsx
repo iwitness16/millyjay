@@ -123,39 +123,9 @@ export default function CartPage() {
     setSubmitSuccess(false);
 
     try {
-      // Import image compression utility
-      const { convertFileToBase64 } = await import('@/lib/imageUtils');
-      
       // Submit each selected item as a separate order
       const orderPromises = selectedItems.map(async (item) => {
         const totalPrice = item.price * item.quantity;
-
-        // Compress images if they exist and are base64 strings
-        let photo = item.formData.photo;
-        let signature = item.formData.signature;
-        
-        // If photo is a large base64 string, try to compress it
-        if (photo && photo.length > 500000) { // ~500KB
-          try {
-            // If it's a data URL, we can't compress it further without the original file
-            // So we'll truncate or skip it with a note
-            photo = photo.substring(0, 500000); // Truncate to ~500KB
-            console.warn('Photo was too large, truncated for storage');
-          } catch (e) {
-            console.error('Error processing photo:', e);
-            photo = null;
-          }
-        }
-        
-        if (signature && signature.length > 500000) {
-          try {
-            signature = signature.substring(0, 500000);
-            console.warn('Signature was too large, truncated for storage');
-          } catch (e) {
-            console.error('Error processing signature:', e);
-            signature = null;
-          }
-        }
 
         const orderData = {
           product: item.product,
@@ -176,9 +146,9 @@ export default function CartPage() {
           weight: item.formData.weight,
           address: item.formData.address,
           customize: item.formData.customize,
-          paymentMethod: item.formData.paymentMethod || '',
-          photo: photo,
-          signature: signature,
+          paymentMethod: item.formData.paymentMethod || 'Not specified',
+          photo: item.formData.photo,
+          signature: item.formData.signature,
         };
 
         const orderId = await submitOrder(orderData);
@@ -190,16 +160,13 @@ export default function CartPage() {
       // Remove submitted items from cart
       const submittedIds = selectedItems.map(item => item.id);
       submittedIds.forEach(id => removeFromCart(id));
-      setCartItems(items => items.filter(item => !item.selected));
-
-      setSubmitSuccess(true);
 
       // Build combined order summary for order-confirmed page (WhatsApp option)
       const summaryLines: string[] = [];
       summaryLines.push('New Cart Order - JAYTIMMAID');
       summaryLines.push('');
       orderResults.forEach((result, index) => {
-        const { orderId, orderData } = result as any;
+        const { orderId, orderData } = result;
         summaryLines.push(`Order ${index + 1}:`);
         summaryLines.push(`- Order ID: ${orderId}`);
         summaryLines.push(`- Product: ${orderData.product}`);
@@ -217,20 +184,11 @@ export default function CartPage() {
         summaryLines.push('');
       });
 
-      const summaryText = summaryLines.join('\n');
-
-      // Store summary for order-confirmed page and redirect
-      // Use window.location.href instead of router.push to force full page reload
-      // This ensures Smartsupp properly detects the URL change for automated messages
-      if (typeof window !== 'undefined') {
-        sessionStorage.setItem('orderConfirmationSummary', summaryText);
-        window.location.href = '/order-confirmed';
-      }
-
+      sessionStorage.setItem('orderConfirmationSummary', summaryLines.join('\n'));
+      window.location.assign('/order-confirmed');
     } catch (error: any) {
       console.error('Error during checkout:', error);
       setSubmitError(error.message || 'Failed to checkout. Please try again.');
-    } finally {
       setIsSubmitting(false);
     }
   };

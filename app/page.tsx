@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ShoppingCart, ChevronUp } from 'lucide-react';
+import { ShoppingCart, ChevronUp, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
 export default function LandingPage() {
@@ -199,18 +199,20 @@ export default function LandingPage() {
           <Link href="/product-list" className="block text-center text-yellow-green mb-8 sm:mb-12 cursor-pointer hover:underline">View more &gt;</Link>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
             {[
-              { name: 'USA', image: '/images/ordertemp.png', category: 'USA ID', priceLabel: '$120' },
-              { name: 'UK', image: '/images/uk.jpg', category: 'UK ID', priceLabel: '£100' },
-              { name: 'CANADA', image: '/images/ontario.jpg', category: 'CANADA ID', priceLabel: '$120' },
-              { name: 'SSN', image: '/images/ssn.png', category: 'SSN', priceLabel: '$120' }
-            ].map((product, idx) => (
-              <div key={idx} className="rounded-lg overflow-hidden hover:opacity-80 transition">
-                <div className="h-40 sm:h-48 flex items-center justify-center relative overflow-hidden">
+              { name: 'USA', image: '/images/ordertemp.png', category: 'USA ID' },
+              { name: 'UK', image: '/images/uk.jpg', category: 'UK ID' },
+              { name: 'CANADA', image: '/images/ontario.jpg', category: 'CANADA ID' },
+              { name: 'SSN', image: '/images/ssn.png', category: 'SSN' }
+            ].map((product, idx) => {
+              const href = `/product-list?category=${encodeURIComponent(product.category)}`;
+              return (
+              <div key={idx} className="rounded-lg overflow-hidden hover:opacity-90 transition group">
+                <Link href={href} className="block h-40 sm:h-48 flex items-center justify-center relative overflow-hidden">
                   <div className="watermarked-image w-full h-full">
                     <img 
                       src={product.image} 
                       alt={product.name}
-                      className="w-full h-full object-contain"
+                      className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
                       onError={(e) => {
                         e.currentTarget.style.display = 'none';
                         const placeholder = document.createElement('div');
@@ -220,15 +222,20 @@ export default function LandingPage() {
                       }}
                     />
                   </div>
-                </div>
+                </Link>
                 <div className="p-4 sm:p-6">
                   <h3 className="text-sm sm:text-base font-medium mb-2 sm:mb-3 text-center">{product.name}</h3>
-                  <Link href={`/product-list?category=${encodeURIComponent(product.category)}`} className="w-full bg-yellow-green text-black py-2 sm:py-2.5 rounded-full font-medium hover:bg-yellow-green transition text-xs sm:text-sm block text-center">
-                    Order - {product.priceLabel}
+                  <Link
+                    href={href}
+                    className="w-full bg-yellow-green text-black py-2 sm:py-2.5 rounded-full font-medium hover:bg-yellow-green transition text-xs sm:text-sm flex items-center justify-center gap-1.5"
+                  >
+                    View all
+                    <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   </Link>
                 </div>
               </div>
-            ))}
+            );
+            })}
           </div>
         </div>
       </section>

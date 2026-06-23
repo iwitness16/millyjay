@@ -1,6 +1,42 @@
 import { db } from './firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
+const MAX_IMAGE_FIELD_LENGTH = 200000;
+
+function trimImageField(value: string | null): string | null {
+  if (!value) return null;
+  if (value.length <= MAX_IMAGE_FIELD_LENGTH) return value;
+  return null;
+}
+
+function sanitizeOrderData(
+  orderData: Omit<OrderData, 'createdAt' | 'status'>
+): Omit<OrderData, 'createdAt' | 'status'> {
+  return {
+    ...orderData,
+    email: orderData.email ?? '',
+    paymentMethod: orderData.paymentMethod?.trim() || 'Not specified',
+    photo: trimImageField(orderData.photo),
+    signature: trimImageField(orderData.signature),
+  };
+}
+
+async function sendOrderEmailNotification(payload: Record<string, unknown>): Promise<void> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+  try {
+    await fetch('/api/send-order-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 export interface OrderData {
   // Product Information
   product: string;
@@ -46,8 +82,10 @@ export const submitOrder = async (
   orderData: Omit<OrderData, 'createdAt' | 'status'>
 ): Promise<string> => {
   try {
+    const sanitized = sanitizeOrderData(orderData);
+
     const orderWithMetadata: OrderData = {
-      ...orderData,
+      ...sanitized,
       createdAt: serverTimestamp(),
       status: 'pending',
     };
@@ -57,25 +95,14 @@ export const submitOrder = async (
       orderWithMetadata
     );
 
-    // Send admin email notification
-    try {
-      await fetch('/api/send-order-email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...orderData,
-          orderId: docRef.id,
-          orderDate: new Date().toLocaleString(),
-        }),
-      });
-    } catch (emailError) {
-      console.error(
-        'Order saved but email notification failed:',
-        emailError
-      );
-    }
+    // Fire-and-forget email — must not block checkout/redirect
+    sendOrderEmailNotification({
+      ...sanitized,
+      orderId: docRef.id,
+      orderDate: new Date().toLocaleString(),
+    }).catch((emailError) => {
+      console.error('Order saved but email notification failed:', emailError);
+    });
 
     return docRef.id;
   } catch (error: any) {
