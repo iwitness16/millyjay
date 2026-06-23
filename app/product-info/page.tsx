@@ -332,7 +332,7 @@ export default function ProductInfoPage() {
                     <div>
                       <p className="font-semibold mb-2">Card Pricing:</p>
                       <ul className="list-disc list-inside space-y-1 ml-2">
-                        <li>Buy 1 card: $120</li>
+                        <li>Buy 1 card: $100</li>
                         <li>Buy 2-3 cards: $180-$270 ($90 per piece)</li>
                         <li>Buy 4-9 cards: $320-$720 ($80 per piece)</li>
                         <li>Buy 10+ cards: $700+ ($70 per piece)</li>

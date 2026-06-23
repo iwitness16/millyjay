@@ -152,7 +152,7 @@ function OrderPageContent() {
         'Birmingham', 'Manchester', 'Liverpool', 'Leeds', 'Bristol'
       ];
       const isUK = ukProducts.includes(formData.product);
-      const basePrice = isUK ? 100 : 120;
+      const basePrice = isUK ? 80 : 100;
       const itemPrice = basePrice;
 
       // Add to cart
@@ -224,11 +224,11 @@ function OrderPageContent() {
   };
 
   const calculatePrice = () => {
-    const basePrice = isUKProduct() ? 100 : 120;
+    const basePrice = isUKProduct() ? 80 : 100;
     return basePrice * quantity;
   };
 
-  const basePrice = isUKProduct() ? 100 : 120;
+  const basePrice = isUKProduct() ? 80 : 100;
   const totalPrice = basePrice * quantity;
 
   return (
