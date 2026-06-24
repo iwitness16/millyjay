@@ -220,7 +220,7 @@ function ProductListPageContent() {
 
           {/* Country grid (default ALL view) */}
           {showCountryGrid ? (
-            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4 lg:gap-5">
+            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-5">
               {COUNTRIES.map((country) => {
                 const count = categoryCounts[country.category] ?? 0;
                 const flagUrl = getCountryFlagUrl(country.code, 80);
@@ -229,36 +229,45 @@ function ProductListPageContent() {
                     key={country.category}
                     type="button"
                     onClick={() => selectCategory(country.category)}
-                    className="group text-center bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md hover:border-gray-300 transition-all duration-200 flex flex-col h-full"
+                    className="group bg-white border border-gray-200 rounded-xl sm:rounded-lg overflow-hidden hover:shadow-md hover:border-gray-300 active:scale-[0.98] transition-all duration-200 flex flex-col h-full text-left"
                   >
-                    <div className="relative px-3 pt-4 pb-2 sm:px-6 sm:pt-7 sm:pb-4">
-                      <span className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-brand-green text-black text-[10px] sm:text-xs font-semibold min-w-[1.5rem] sm:min-w-[2rem] h-6 sm:h-8 px-1.5 sm:px-2 rounded-full flex items-center justify-center">
-                        {count}
-                      </span>
-                      <p className="text-2xl sm:text-4xl lg:text-5xl font-bold text-brand-green tracking-wide leading-none">
+                    {/* Header: badge pinned top-right via flex (reliable on iOS) */}
+                    <div className="px-3 pt-3 pb-1 sm:px-5 sm:pt-5 sm:pb-2">
+                      <div className="flex justify-end w-full mb-1 sm:mb-2">
+                        <span className="inline-flex items-center justify-center bg-brand-green text-black text-[10px] sm:text-xs font-bold min-w-[1.625rem] h-[1.625rem] sm:min-w-[2rem] sm:h-8 px-1.5 sm:px-2 rounded-full leading-none tabular-nums">
+                          {count}
+                        </span>
+                      </div>
+                      <p className="text-center text-2xl sm:text-4xl lg:text-5xl font-bold text-brand-green tracking-wide leading-none">
                         {country.code}
                       </p>
                     </div>
-                    <div className="px-3 pb-2 sm:px-6 sm:pb-4 flex-1 flex flex-col">
-                      <h2 className="text-sm sm:text-lg lg:text-xl font-semibold text-brand-green flex items-center justify-center gap-1.5 sm:gap-2 leading-tight">
-                        {country.name} ID
+
+                    {/* Body */}
+                    <div className="px-3 pb-2 sm:px-5 sm:pb-4 flex-1 flex flex-col items-center text-center">
+                      <h2 className="text-xs sm:text-base lg:text-lg font-semibold text-brand-green flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 leading-snug w-full">
+                        <span className="whitespace-nowrap">{country.name} ID</span>
                         {flagUrl && (
                           <img
                             src={flagUrl}
                             alt=""
-                            className="w-5 h-3.5 sm:w-7 sm:h-5 object-cover rounded-sm shadow-sm flex-shrink-0"
+                            className="w-5 h-3.5 sm:w-6 sm:h-4 object-cover rounded-sm shadow-sm flex-shrink-0"
                             loading="lazy"
                           />
                         )}
                       </h2>
-                      <p className="text-[11px] sm:text-sm text-gray-500 mt-1 sm:mt-2">{count} products</p>
-                      <p className="hidden sm:block text-xs text-gray-400 mt-2 leading-relaxed line-clamp-2">{country.description}</p>
+                      <p className="text-[10px] sm:text-sm text-gray-500 mt-1 sm:mt-2">{count} products</p>
+                      <p className="hidden sm:block text-xs text-gray-400 mt-2 leading-relaxed line-clamp-2 px-1">
+                        {country.description}
+                      </p>
                     </div>
-                    <div className="px-2.5 pb-2.5 sm:px-4 sm:pb-4 mt-auto">
-                      <span className="flex items-center justify-center gap-1.5 sm:gap-2 w-full bg-brand-green text-black py-2 sm:py-3 rounded-md font-medium text-xs sm:text-sm group-hover:bg-brand-green-dark transition-colors">
-                        View All
-                        <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                      </span>
+
+                    {/* CTA */}
+                    <div className="px-3 pb-3 pt-1 sm:px-4 sm:pb-4 sm:pt-0 mt-auto">
+                      <div className="flex items-center justify-center gap-1.5 w-full min-h-[2.375rem] sm:min-h-[2.75rem] bg-brand-green text-black rounded-lg sm:rounded-md font-semibold text-[11px] sm:text-sm leading-none group-hover:bg-brand-green-dark transition-colors">
+                        <span>View All</span>
+                        <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" aria-hidden="true" />
+                      </div>
                     </div>
                   </button>
                 );
