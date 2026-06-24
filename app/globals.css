@@ -3,6 +3,10 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --nav-bar: 3.5rem;
+  --nav-mobile-menu: 1.875rem;
+  --nav-height-mobile: calc(var(--nav-bar) + var(--nav-mobile-menu) + env(safe-area-inset-top, 0px));
+  --nav-height-desktop: calc(4rem + env(safe-area-inset-top, 0px));
 }
 
 @theme inline {
@@ -31,6 +35,47 @@ html {
   width: 100%;
   -webkit-text-size-adjust: 100%;
   -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+.pt-nav-offset {
+  padding-top: var(--nav-height-mobile);
+}
+
+@media (min-width: 640px) {
+  .pt-nav-offset {
+    padding-top: calc(4rem + var(--nav-mobile-menu) + env(safe-area-inset-top, 0px));
+  }
+}
+
+@media (min-width: 1024px) {
+  .pt-nav-offset {
+    padding-top: var(--nav-height-desktop);
+  }
+}
+
+.nav-safe-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.pb-fab-safe {
+  padding-bottom: calc(6rem + env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 640px) {
+  .pb-fab-safe {
+    padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+.fab-bottom-left {
+  bottom: calc(6.5rem + env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 640px) {
+  .fab-bottom-left {
+    bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 body {

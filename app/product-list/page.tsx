@@ -15,7 +15,7 @@ import {
   type ProductCategory,
 } from '@/lib/products';
 
-function CountryFlag({ code, className = 'w-5 h-3.5' }: { code: string; className?: string }) {
+function CountryFlag({ code, className = 'w-4 h-3 sm:w-5 sm:h-3.5' }: { code: string; className?: string }) {
   const src = getCountryFlagUrl(code, 40);
   if (!src) return null;
   return (
@@ -83,13 +83,13 @@ function ProductListPageContent() {
   return (
     <div className="min-h-screen bg-[#f0f2f5] font-sans">
       {/* Navigation */}
-      <nav className="fixed top-0 w-full bg-black/95 backdrop-blur-sm z-50 border-b border-white">
-        <div className="px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+      <nav className="fixed top-0 w-full bg-black/95 backdrop-blur-sm z-50 border-b border-white nav-safe-top">
+        <div className="px-3 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-14 sm:h-16">
             <Link href="/" className="flex items-center space-x-3 min-w-0">
-              <img src="/images/logo.jpg" alt="JAYTIMMAID Logo" className="h-10 w-10 sm:h-12 sm:w-12 object-contain rounded-lg flex-shrink-0" />
+              <img src="/images/logo.jpg" alt="JAYTIMMAID Logo" className="h-9 w-9 sm:h-12 sm:w-12 object-contain rounded-lg flex-shrink-0" />
               <div className="flex flex-col min-w-0">
-                <div className="text-yellow-green text-base sm:text-lg font-display font-semibold tracking-tight truncate">JAYTIMMAID</div>
+                <div className="text-yellow-green text-sm sm:text-lg font-display font-semibold tracking-tight truncate">JAYTIMMAID</div>
                 <div className="text-xs text-gray-400 hidden sm:block font-sans">Scannable UV hologram</div>
               </div>
             </Link>
@@ -114,8 +114,8 @@ function ProductListPageContent() {
               </Link>
             </div>
           </div>
-          <div className="lg:hidden overflow-x-auto pb-3 hide-scrollbar">
-            <div className="flex space-x-5 min-w-max">
+          <div className="lg:hidden overflow-x-auto pb-2 hide-scrollbar -mx-3 px-3 sm:mx-0 sm:px-0">
+            <div className="flex space-x-4 min-w-max pr-2">
               <Link href="/" className="text-gray-300 hover:text-yellow-green transition text-xs whitespace-nowrap">HOME</Link>
               <Link href="/product-info" className="text-gray-300 hover:text-yellow-green transition text-xs whitespace-nowrap">PRODUCT INFO</Link>
               <Link href="/order" className="text-gray-300 hover:text-yellow-green transition text-xs whitespace-nowrap">ORDER</Link>
@@ -134,19 +134,24 @@ function ProductListPageContent() {
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
 
-      {/* Banner — full-width image on mobile (no crop); fixed height on desktop */}
-      <div className="pt-[6.75rem] lg:pt-24">
-        <div className="w-full overflow-hidden bg-black leading-[0]">
-          <img
-            src="/images/bgimg.png"
-            alt="JAYTIMMAID product features"
-            className="w-full h-auto block lg:h-64 lg:object-cover lg:object-center"
-          />
+      {/* Banner */}
+      <div className="pt-nav-offset">
+        <div className="relative w-full overflow-hidden bg-black">
+          <div className="relative w-full aspect-[2.15/1] min-h-[130px] max-h-[180px] sm:aspect-[2.35/1] sm:max-h-[220px] lg:aspect-auto lg:max-h-none lg:h-56 xl:h-64">
+            <img
+              src="/images/bgimg.png"
+              alt="JAYTIMMAID product features"
+              width={1200}
+              height={512}
+              decoding="async"
+              className="absolute inset-0 w-full h-full object-cover object-[center_45%] sm:object-center"
+            />
+          </div>
         </div>
       </div>
 
-      <div className="pb-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto pt-6">
+      <div className="pb-fab-safe px-3 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto pt-4 sm:pt-6">
           {/* Breadcrumb */}
           <div className="mb-4 text-sm text-gray-600 flex flex-wrap items-center gap-1">
             <Link href="/" className="hover:text-brand-green">Home</Link>
@@ -165,26 +170,26 @@ function ProductListPageContent() {
           </div>
 
           {/* Search */}
-          <div className="mb-6">
+          <div className="mb-4 sm:mb-6">
             <div className="relative max-w-2xl mx-auto">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by state or region..."
-                className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-green/30 focus:border-brand-green bg-white text-gray-800"
+                className="w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-green/30 focus:border-brand-green bg-white text-gray-800"
               />
             </div>
           </div>
 
           {/* Category chips */}
-          <div className="mb-8 overflow-x-auto hide-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
-            <div className="flex gap-2 min-w-max pb-1">
+          <div className="mb-5 sm:mb-8 overflow-x-auto hide-scrollbar -mx-3 px-3 sm:mx-0 sm:px-0">
+            <div className="flex gap-1.5 sm:gap-2 min-w-max pb-1">
               <button
                 type="button"
                 onClick={() => selectCategory('ALL')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition whitespace-nowrap ${
+                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition whitespace-nowrap ${
                   selectedCategory === 'ALL'
                     ? 'bg-brand-green text-black shadow-sm'
                     : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300'
@@ -197,7 +202,7 @@ function ProductListPageContent() {
                   key={country.category}
                   type="button"
                   onClick={() => selectCategory(country.category)}
-                  className={`px-4 py-2 rounded-md text-sm font-medium transition whitespace-nowrap flex items-center gap-2 ${
+                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition whitespace-nowrap flex items-center gap-1.5 sm:gap-2 ${
                     selectedCategory === country.category
                       ? 'bg-brand-green text-black shadow-sm'
                       : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300'
@@ -215,7 +220,7 @@ function ProductListPageContent() {
 
           {/* Country grid (default ALL view) */}
           {showCountryGrid ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4 lg:gap-5">
               {COUNTRIES.map((country) => {
                 const count = categoryCounts[country.category] ?? 0;
                 const flagUrl = getCountryFlagUrl(country.code, 80);
@@ -224,35 +229,35 @@ function ProductListPageContent() {
                     key={country.category}
                     type="button"
                     onClick={() => selectCategory(country.category)}
-                    className="group text-center bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md hover:border-gray-300 transition-all duration-200 flex flex-col"
+                    className="group text-center bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md hover:border-gray-300 transition-all duration-200 flex flex-col h-full"
                   >
-                    <div className="relative px-6 pt-8 pb-5">
-                      <span className="absolute top-3 right-3 bg-brand-green text-black text-xs font-semibold min-w-[2rem] h-8 px-2 rounded-full flex items-center justify-center">
+                    <div className="relative px-3 pt-4 pb-2 sm:px-6 sm:pt-7 sm:pb-4">
+                      <span className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-brand-green text-black text-[10px] sm:text-xs font-semibold min-w-[1.5rem] sm:min-w-[2rem] h-6 sm:h-8 px-1.5 sm:px-2 rounded-full flex items-center justify-center">
                         {count}
                       </span>
-                      <p className="text-4xl sm:text-5xl font-bold text-brand-green tracking-wide">
+                      <p className="text-2xl sm:text-4xl lg:text-5xl font-bold text-brand-green tracking-wide leading-none">
                         {country.code}
                       </p>
                     </div>
-                    <div className="px-6 pb-5 flex-1">
-                      <h2 className="text-lg sm:text-xl font-semibold text-brand-green flex items-center justify-center gap-2">
+                    <div className="px-3 pb-2 sm:px-6 sm:pb-4 flex-1 flex flex-col">
+                      <h2 className="text-sm sm:text-lg lg:text-xl font-semibold text-brand-green flex items-center justify-center gap-1.5 sm:gap-2 leading-tight">
                         {country.name} ID
                         {flagUrl && (
                           <img
                             src={flagUrl}
                             alt=""
-                            className="w-7 h-5 object-cover rounded-sm shadow-sm"
+                            className="w-5 h-3.5 sm:w-7 sm:h-5 object-cover rounded-sm shadow-sm flex-shrink-0"
                             loading="lazy"
                           />
                         )}
                       </h2>
-                      <p className="text-sm text-gray-500 mt-2">{count} products available</p>
-                      <p className="text-xs text-gray-400 mt-2 leading-relaxed">{country.description}</p>
+                      <p className="text-[11px] sm:text-sm text-gray-500 mt-1 sm:mt-2">{count} products</p>
+                      <p className="hidden sm:block text-xs text-gray-400 mt-2 leading-relaxed line-clamp-2">{country.description}</p>
                     </div>
-                    <div className="px-4 pb-4 mt-auto">
-                      <span className="flex items-center justify-center gap-2 w-full bg-brand-green text-black py-3 rounded-md font-medium text-sm group-hover:bg-brand-green-dark transition-colors">
+                    <div className="px-2.5 pb-2.5 sm:px-4 sm:pb-4 mt-auto">
+                      <span className="flex items-center justify-center gap-1.5 sm:gap-2 w-full bg-brand-green text-black py-2 sm:py-3 rounded-md font-medium text-xs sm:text-sm group-hover:bg-brand-green-dark transition-colors">
                         View All
-                        <ArrowRight className="w-4 h-4" />
+                        <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       </span>
                     </div>
                   </button>
@@ -297,7 +302,7 @@ function ProductListPageContent() {
                   <p className="text-gray-500 text-lg">No products found matching your search.</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 lg:gap-6">
                   {filteredProducts.map((product) => (
                     <div key={product.id} className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
                       <div
@@ -325,8 +330,8 @@ function ProductListPageContent() {
                           </div>
                         </div>
                       </div>
-                      <div className="p-3 sm:p-4">
-                        <h3 className="text-sm sm:text-base font-semibold text-center mb-3 text-gray-800 line-clamp-2 min-h-[2.5rem]">
+                      <div className="p-2 sm:p-3 lg:p-4">
+                        <h3 className="text-xs sm:text-sm lg:text-base font-semibold text-center mb-2 sm:mb-3 text-gray-800 line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem] leading-snug">
                           {product.name}
                         </h3>
                         <Link
@@ -352,10 +357,10 @@ function ProductListPageContent() {
         </div>
       </footer>
 
-      <div className="fixed left-4 bottom-4 z-30">
+      <div className="fixed left-3 sm:left-4 z-30 fab-bottom-left hidden sm:block">
         <button
           type="button"
-          className="bg-brand-green text-black p-3 rounded-full shadow-lg hover:bg-brand-green-dark transition"
+          className="bg-brand-green text-black p-2.5 sm:p-3 rounded-full shadow-lg hover:bg-brand-green-dark transition"
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           aria-label="Back to top"
         >
