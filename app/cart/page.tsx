@@ -5,15 +5,13 @@ import { ShoppingCart, ChevronUp, Minus, Plus, X } from 'lucide-react';
 import Link from 'next/link';
 import { getCartItems, updateCartItem, removeFromCart, clearCart, type CartItem } from '@/lib/cart';
 import { submitOrder } from '@/lib/firestore';
-import { useRouter } from 'next/navigation';
+import { formatPriceForProduct } from '@/lib/products';
+import { buildCartOrderMessage, openWhatsAppWithMessage } from '@/lib/orderWhatsApp';
 
 export default function CartPage() {
-  const router = useRouter();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
-
   // Load cart items from localStorage
   useEffect(() => {
     const loadCart = () => {
@@ -29,13 +27,8 @@ export default function CartPage() {
   }, []);
 
   // Check if product is UK
-  const isUKProduct = (productName: string) => {
-    const ukProducts = [
-      'London', 'Newcastle', 'Wales', 'Scotland', 'Northern Ireland',
-      'Birmingham', 'Manchester', 'Liverpool', 'Leeds', 'Bristol'
-    ];
-    return ukProducts.includes(productName);
-  };
+  const formatItemPrice = (productName: string, amount: number) =>
+    formatPriceForProduct(productName, amount);
 
   // Calculate totals
   const selectedItems = cartItems.filter(item => item.selected);
@@ -120,7 +113,6 @@ export default function CartPage() {
 
     setIsSubmitting(true);
     setSubmitError(null);
-    setSubmitSuccess(false);
 
     try {
       // Submit each selected item as a separate order
@@ -157,35 +149,27 @@ export default function CartPage() {
 
       const orderResults = await Promise.all(orderPromises);
 
-      // Remove submitted items from cart
-      const submittedIds = selectedItems.map(item => item.id);
-      submittedIds.forEach(id => removeFromCart(id));
+      const submittedIds = selectedItems.map((item) => item.id);
+      submittedIds.forEach((id) => removeFromCart(id));
 
-      // Build combined order summary for order-confirmed page (WhatsApp option)
-      const summaryLines: string[] = [];
-      summaryLines.push('New Cart Order - JAYTIMMAID');
-      summaryLines.push('');
-      orderResults.forEach((result, index) => {
-        const { orderId, orderData } = result;
-        summaryLines.push(`Order ${index + 1}:`);
-        summaryLines.push(`- Order ID: ${orderId}`);
-        summaryLines.push(`- Product: ${orderData.product}`);
-        summaryLines.push(`- Quantity: ${orderData.quantity}`);
-        summaryLines.push(`- Total Price: $${orderData.totalPrice}`);
-        summaryLines.push(`- Payment Method: ${orderData.paymentMethod || ''}`);
-        summaryLines.push(
-          `- Name: ${orderData.firstName} ${orderData.middleName || ''} ${orderData.lastName}`.trim()
-        );
-        summaryLines.push(`- Email: ${orderData.email}`);
-        summaryLines.push(`- Contact (${orderData.social}): ${orderData.socialValue}`);
-        if (orderData.address) {
-          summaryLines.push(`- Address: ${orderData.address}`);
-        }
-        summaryLines.push('');
-      });
+      const whatsappItems = orderResults.map(({ orderId, orderData }) => ({
+        orderId,
+        product: orderData.product,
+        quantity: orderData.quantity,
+        totalPrice: orderData.totalPrice,
+        paymentMethod: orderData.paymentMethod,
+        firstName: orderData.firstName,
+        middleName: orderData.middleName,
+        lastName: orderData.lastName,
+        email: orderData.email,
+        social: orderData.social,
+        socialValue: orderData.socialValue,
+        address: orderData.address,
+      }));
 
-      sessionStorage.setItem('orderConfirmationSummary', summaryLines.join('\n'));
-      window.location.assign('/order-confirmed');
+      const whatsappMessage = buildCartOrderMessage(whatsappItems);
+      openWhatsAppWithMessage(whatsappMessage);
+      setTimeout(() => window.location.assign('/order-confirmed'), 400);
     } catch (error: any) {
       console.error('Error during checkout:', error);
       setSubmitError(error.message || 'Failed to checkout. Please try again.');
@@ -276,13 +260,6 @@ export default function CartPage() {
             </h1>
           </div>
 
-          {/* Success Message */}
-          {submitSuccess && (
-            <div className="text-orange-600 mb-4">
-              <p className="font-medium">Your orders have been submitted successfully. We'll contact you soon!</p>
-            </div>
-          )}
-
           {/* Error Message */}
           {submitError && (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
@@ -348,7 +325,7 @@ export default function CartPage() {
                           </div>
                         </td>
                         <td className="px-3 sm:px-4 py-3 text-center text-gray-800 font-medium text-xs sm:text-sm">
-                          {isUKProduct(item.product) ? '£' : '$'}{item.price}
+                          {formatItemPrice(item.product, item.price)}
                         </td>
                         <td className="px-3 sm:px-4 py-3">
                           <div className="flex items-center justify-center space-x-2">
@@ -368,7 +345,7 @@ export default function CartPage() {
                           </div>
                         </td>
                         <td className="px-3 sm:px-4 py-3 text-center text-gray-800 font-medium text-xs sm:text-sm">
-                          {isUKProduct(item.product) ? '£' : '$'}{item.price * item.quantity}
+                          {formatItemPrice(item.product, item.price * item.quantity)}
                         </td>
                         <td className="px-3 sm:px-4 py-3">
                           <div className="flex items-center justify-center space-x-1 sm:space-x-2">
@@ -424,11 +401,11 @@ export default function CartPage() {
                     <div className="grid grid-cols-2 gap-3 mb-3 text-xs sm:text-sm">
                       <div>
                         <span className="text-gray-500">Price: </span>
-                        <span className="font-medium text-gray-800">{isUKProduct(item.product) ? '£' : '$'}{item.price}</span>
+                        <span className="font-medium text-gray-800">{formatItemPrice(item.product, item.price)}</span>
                       </div>
                       <div>
                         <span className="text-gray-500">Subtotal: </span>
-                        <span className="font-medium text-gray-800">{isUKProduct(item.product) ? '£' : '$'}{item.price * item.quantity}</span>
+                        <span className="font-medium text-gray-800">{formatItemPrice(item.product, item.price * item.quantity)}</span>
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
@@ -519,7 +496,14 @@ export default function CartPage() {
                 disabled={selectedCount === 0 || isSubmitting}
                 className="flex-1 px-4 sm:px-6 py-2 sm:py-3 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm"
               >
-                {isSubmitting ? 'Processing...' : 'Place Order'}
+                {isSubmitting ? (
+                  <span className="inline-flex items-center justify-center gap-2">
+                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Saving order...
+                  </span>
+                ) : (
+                  'Send order via WhatsApp'
+                )}
               </button>
             </div>
           </div>

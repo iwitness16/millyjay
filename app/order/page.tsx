@@ -1,12 +1,17 @@
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, Suspense, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { ShoppingCart, ChevronUp, Upload, MapPin, User, DollarSign, Package, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
-import { submitOrder } from '@/lib/firestore';
 import { addToCart, getCartItemCount } from '@/lib/cart';
-import { getProductFrontImage, DEFAULT_PRODUCT_FRONT_IMAGE } from '@/lib/productImages';
+import {
+  COUNTRIES,
+  getProductPrice,
+  formatPriceForProduct,
+  getProductsByCategory,
+  getProductImage,
+} from '@/lib/products';
 import { useRouter } from 'next/navigation';
 
 function OrderPageContent() {
@@ -36,10 +41,9 @@ function OrderPageContent() {
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [signatureFile, setSignatureFile] = useState<File | null>(null);
   const [quantity, setQuantity] = useState(1);
-  const [mainProductImage, setMainProductImage] = useState(DEFAULT_PRODUCT_FRONT_IMAGE);
+  const [imageView, setImageView] = useState<'front' | 'uv' | 'back'>('front');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [cartSuccess, setCartSuccess] = useState(false);
   const [cartCount, setCartCount] = useState(0);
@@ -62,9 +66,20 @@ function OrderPageContent() {
     }
   }, [searchParams]);
 
-  // Update main product image based on selected product
+  const productFrontImage = useMemo(
+    () => getProductImage(formData.product),
+    [formData.product]
+  );
+
+  const mainProductImage = useMemo(() => {
+    if (imageView === 'uv') return '/images/uvfront.jpg';
+    if (imageView === 'back') return '/images/idback.jpg';
+    return productFrontImage;
+  }, [imageView, productFrontImage]);
+
+  // Reset to front view when product changes
   useEffect(() => {
-    setMainProductImage(getProductFrontImage(formData.product));
+    setImageView('front');
   }, [formData.product]);
 
   const handleInputChange = (field: string, value: string) => {
@@ -146,13 +161,7 @@ function OrderPageContent() {
         signatureBase64 = signaturePreview;
       }
 
-      // Calculate price
-      const ukProducts = [
-        'London', 'Newcastle', 'Wales', 'Scotland', 'Northern Ireland',
-        'Birmingham', 'Manchester', 'Liverpool', 'Leeds', 'Bristol'
-      ];
-      const isUK = ukProducts.includes(formData.product);
-      const basePrice = isUK ? 80 : 100;
+      const basePrice = getProductPrice(formData.product);
       const itemPrice = basePrice;
 
       // Add to cart
@@ -160,7 +169,7 @@ function OrderPageContent() {
         product: formData.product,
         quantity: quantity,
         price: itemPrice,
-        image: mainProductImage,
+        image: productFrontImage,
         formData: {
           social: 'WhatsApp',
           socialValue: formData.socialValue,
@@ -201,8 +210,6 @@ function OrderPageContent() {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitError(null);
-    setSubmitSuccess(false);
-
     try {
       // Reuse existing add-to-cart validation and logic, then go to cart page
       await handleAddToCart();
@@ -214,22 +221,9 @@ function OrderPageContent() {
     }
   };
 
-  // Check if product is a UK product
-  const isUKProduct = () => {
-    const ukProducts = [
-      'London', 'Newcastle', 'Wales', 'Scotland', 'Northern Ireland',
-      'Birmingham', 'Manchester', 'Liverpool', 'Leeds', 'Bristol'
-    ];
-    return ukProducts.includes(formData.product);
-  };
-
-  const calculatePrice = () => {
-    const basePrice = isUKProduct() ? 80 : 100;
-    return basePrice * quantity;
-  };
-
-  const basePrice = isUKProduct() ? 80 : 100;
+  const basePrice = getProductPrice(formData.product);
   const totalPrice = basePrice * quantity;
+  const priceLabel = formatPriceForProduct(formData.product, totalPrice);
 
   return (
     <div className="min-h-screen bg-white font-sans">
@@ -306,25 +300,6 @@ function OrderPageContent() {
       {/* Main Content */}
       <div className="pt-32 sm:pt-40 lg:pt-48 pb-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          {/* WhatsApp ordering notice */}
-          <div className="mb-8">
-            <div className="flex items-start gap-3 sm:gap-4 rounded-xl border border-[#25D366]/30 bg-gradient-to-r from-[#25D366]/10 via-white to-white p-4 sm:p-5 shadow-sm">
-              <div className="flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-[#25D366] flex items-center justify-center shadow-md">
-                <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                </svg>
-              </div>
-              <div className="min-w-0 pt-0.5">
-                <p className="text-sm sm:text-base font-semibold text-gray-900">
-                  Orders are completed on WhatsApp
-                </p>
-                <p className="mt-1 text-xs sm:text-sm text-gray-600 leading-relaxed">
-                  Fill in your details below, then confirm your order via WhatsApp at checkout.
-                </p>
-              </div>
-            </div>
-          </div>
-
           {/* Product Display and Order Info Section */}
           <div className="grid lg:grid-cols-2 gap-8 mb-12">
             {/* Left: Product Display */}
@@ -356,13 +331,13 @@ function OrderPageContent() {
               {/* Thumbnail Images */}
               <div className="grid grid-cols-3 gap-4">
                 <div 
-                  onClick={() => setMainProductImage(getProductFrontImage(formData.product))}
-                  className="bg-white rounded-lg shadow p-2 cursor-pointer hover:shadow-lg transition-all border-2 border-transparent hover:border-yellow-green"
+                  onClick={() => setImageView('front')}
+                  className={`bg-white rounded-lg shadow p-2 cursor-pointer hover:shadow-lg transition-all border-2 ${imageView === 'front' ? 'border-yellow-green' : 'border-transparent hover:border-yellow-green'}`}
                 >
                   <div className="bg-gray-100 rounded aspect-[3.375/2.125] flex items-center justify-center overflow-hidden relative">
                     <div className="watermarked-image w-full h-full">
                       <img 
-                        src={getProductFrontImage(formData.product)} 
+                        src={productFrontImage} 
                         alt="Front view" 
                         className="w-full h-full object-contain"
                         onError={(e) => {
@@ -373,8 +348,8 @@ function OrderPageContent() {
                   </div>
                 </div>
                 <div 
-                  onClick={() => setMainProductImage('/images/uvfront.jpg')}
-                  className="bg-white rounded-lg shadow p-2 cursor-pointer hover:shadow-lg transition-all border-2 border-transparent hover:border-yellow-green"
+                  onClick={() => setImageView('uv')}
+                  className={`bg-white rounded-lg shadow p-2 cursor-pointer hover:shadow-lg transition-all border-2 ${imageView === 'uv' ? 'border-yellow-green' : 'border-transparent hover:border-yellow-green'}`}
                 >
                   <div className="bg-gray-100 rounded aspect-[3.375/2.125] flex items-center justify-center overflow-hidden relative">
                     <div className="watermarked-image w-full h-full">
@@ -390,8 +365,8 @@ function OrderPageContent() {
                   </div>
                 </div>
                 <div 
-                  onClick={() => setMainProductImage('/images/idback.jpg')}
-                  className="bg-white rounded-lg shadow p-2 cursor-pointer hover:shadow-lg transition-all border-2 border-transparent hover:border-yellow-green"
+                  onClick={() => setImageView('back')}
+                  className={`bg-white rounded-lg shadow p-2 cursor-pointer hover:shadow-lg transition-all border-2 ${imageView === 'back' ? 'border-yellow-green' : 'border-transparent hover:border-yellow-green'}`}
                 >
                   <div className="bg-gray-100 rounded aspect-[3.375/2.125] flex items-center justify-center overflow-hidden relative">
                     <div className="watermarked-image w-full h-full">
@@ -421,57 +396,15 @@ function OrderPageContent() {
                   onChange={(e) => handleInputChange('product', e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-green focus:border-transparent"
                 >
-                  <option value="Alabama">Alabama</option>
-                  <option value="Arizona">Arizona</option>
-                  <option value="Birmingham">Birmingham</option>
-                  <option value="Bristol">Bristol</option>
-                  <option value="British Columbia">British Columbia</option>
-                  <option value="California">California</option>
-                  <option value="California CM1">California CM1</option>
-                  <option value="California CDL">California CDL</option>
-                  <option value="Connecticut">Connecticut</option>
-                  <option value="Delaware">Delaware</option>
-                  <option value="Florida">Florida</option>
-                  <option value="Florida Motorcycle">Florida Motorcycle</option>
-                  <option value="Georgia">Georgia</option>
-                  <option value="Illinois">Illinois</option>
-                  <option value="Illinois CDL">Illinois CDL</option>
-                  <option value="Indiana">Indiana</option>
-                  <option value="Kansas">Kansas</option>
-                  <option value="Leeds">Leeds</option>
-                  <option value="Liverpool">Liverpool</option>
-                  <option value="London">London</option>
-                  <option value="Maryland">Maryland</option>
-                  <option value="Manchester">Manchester</option>
-                  <option value="Massachusetts">Massachusetts</option>
-                  <option value="Michigan">Michigan</option>
-                  <option value="Minnesota">Minnesota</option>
-                  <option value="Mississippi">Mississippi</option>
-                  <option value="Missouri">Missouri</option>
-                  <option value="Nebraska">Nebraska</option>
-                  <option value="Nevada">Nevada</option>
-                  <option value="New Jersey">New Jersey</option>
-                  <option value="New York Old Verison">New York Old Verison</option>
-                  <option value="New York CDL">New York CDL</option>
-                  <option value="Newcastle">Newcastle</option>
-                  <option value="North Carolina">North Carolina</option>
-                  <option value="Northern Ireland">Northern Ireland</option>
-                  <option value="Ohio">Ohio</option>
-                  <option value="Ohio CDL">Ohio CDL</option>
-                  <option value="Ontario">Ontario</option>
-                  <option value="Pennsylvania">Pennsylvania</option>
-                  <option value="Pennsylvania CDL">Pennsylvania CDL</option>
-                  <option value="Quebec">Quebec</option>
-                  <option value="Rhode Island">Rhode Island</option>
-                  <option value="Scotland">Scotland</option>
-                  <option value="South Carolina">South Carolina</option>
-                  <option value="SSN">SSN</option>
-                  <option value="Texas">Texas</option>
-                  <option value="Texas CDL">Texas CDL</option>
-                  <option value="Utah">Utah</option>
-                  <option value="Virginia">Virginia</option>
-                  <option value="Wales">Wales</option>
-                  <option value="Washington">Washington</option>
+                  {COUNTRIES.map((country) => (
+                    <optgroup key={country.category} label={`${country.flag} ${country.name}`}>
+                      {getProductsByCategory(country.category).map((product) => (
+                        <option key={product.id} value={product.name}>
+                          {product.name}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
                 </select>
               </div>
 
@@ -507,7 +440,7 @@ function OrderPageContent() {
               <div>
                 <label className="block text-gray-700 font-semibold mb-2">Total Price:</label>
                 <div className="flex items-center gap-3">
-                  <span className="text-2xl font-bold text-red-600">{isUKProduct() ? '£' : '$'}{totalPrice}</span>
+                  <span className="text-2xl font-bold text-red-600">{priceLabel}</span>
                 </div>
               </div>
 
@@ -579,13 +512,6 @@ function OrderPageContent() {
           </div>
           {/* Order Form */}
           <form onSubmit={handleFormSubmit} className="bg-white rounded-lg shadow-lg p-6 sm:p-8 space-y-6">
-            {/* Success Message */}
-            {submitSuccess && (
-              <div className="text-orange-600 mb-4">
-                <p className="font-medium">Your order has been submitted successfully. We'll contact you soon!</p>
-              </div>
-            )}
-
             {/* Cart Success Message */}
             {cartSuccess && (
               <div className="text-orange-600 mb-4">
@@ -958,7 +884,7 @@ function OrderPageContent() {
                 disabled={isSubmitting}
                 className="flex-1 bg-orange-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-orange-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isSubmitting ? 'Submitting...' : 'CheckOut'}
+                {isSubmitting ? 'Adding to cart...' : 'Go to Cart'}
               </button>
             </div>
           </form>
