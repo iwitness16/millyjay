@@ -8,7 +8,7 @@ This guide will help you set up EmailJS to send order notifications to `orders@i
 2. Sign up for a free account (or log in if you already have one)
 3. The free plan includes 200 emails per month
 
-## Step 2: Create Email Service
+## Step 2:
 
 1. In your EmailJS dashboard, go to **Email Services**
 2. Click **Add New Service**
