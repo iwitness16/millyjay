@@ -1,11 +1,16 @@
 'use client';
 
 import React, { useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { WHATSAPP_NUMBER, TELEGRAM_URL } from '@/lib/site';
 
 export default function WhatsAppWidget() {
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState('');
+
+  // Don't render on the shutdown page
+  if (pathname === '/shutdown') return null;
 
   const handleSend = () => {
     const baseMessage = message.trim() || 'Hi, I would like to know more about your services.';
